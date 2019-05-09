@@ -36,6 +36,7 @@ float sdBox(in vec3 p, in vec3 box) {
 
 float sdSphere(vec3 p, float s) {
    return length(p) - s;
+
 }
 
 vec2 intersectSpheres(in vec3 p, bool refrSph) {
@@ -43,7 +44,9 @@ vec2 intersectSpheres(in vec3 p, bool refrSph) {
 
     vec2 res = vec2(ID_VOID, 2000.0);
 
+    // TODO how to compute refraction ----------------------------------
     if (refrSph) res = vec2(ID_SPHERE_REFRACT, sdSphere(p + vec3(380.0, 468.8, 166.0), SPHERE_REFRACT.x));
+
     vec2 obj = vec2(ID_SPHERE_REFLECT, sdSphere(p + vec3(190.0, 448.8, 365.0), SPHERE_REFLECT.x));
     if (obj.y < res.y) res = obj;
 
@@ -58,7 +61,12 @@ vec2 intersect(in vec3 p, bool refrSph) {
     vec2 obj = vec2(ID_LIGHT, sdBox(p + lightPos, LIGHT.xyz));
     if (obj.y < res.y) res = obj;
 
-    obj = vec2(ID_FLOOR, sdBox(p + vec3(278.0, 548.8, 279.6), FLOOR.xyz));
+
+    // ==========================================================
+    // TODO compare distance one by one to find minimum distance 
+    // ==========================================================
+
+    obj = vec2(ID_FLOOR, sdBox(p + vec3(278.0, 548.8, 279.6), FLOOR.xyz)); // TODO intersect with a box which top side as floor , the same way to ceiling and walls
     if (obj.y < res.y) res = obj;
     obj = vec2(ID_CEILING, sdBox(p + vec3(278.0, 0.0, 279.6), CEILING.xyz));
     if (obj.y < res.y) res = obj;
@@ -69,7 +77,7 @@ vec2 intersect(in vec3 p, bool refrSph) {
     obj = vec2(ID_WALL_LEFT, sdBox(p + vec3(0.0, 274.4, 279.6), WALL_LEFT.xyz));
     if (obj.y < res.y) res = obj;
 
-    obj = intersectSpheres(p, refrSph);
+    obj = intersectSpheres(p, refrSph);// shpere needs specific intersect check 
     if (obj.y < res.y) res = obj;
 
     return res;
@@ -88,10 +96,12 @@ vec2 raymarchScene(in vec3 ro, in vec3 rd, in float tmin, in float tmax, bool re
         float d = res.y;
         if (d < (0.001 * t) || t > tmax)
             break;
-        t += 0.5 * d;
+        t += 0.5 * d; //TODO why half  distance  once 
+        // t += d;
     }
     return res.xz;
 }
+
 
 vec3 getNormal(in vec3 p) {
     vec2 eps = vec2(0.005, 0.0);
