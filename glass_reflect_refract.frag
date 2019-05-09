@@ -344,4 +344,5 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     // gamma correction
     vec3 gamma = vec3(1.0 / 2.2);
     fragColor = vec4(pow(color, gamma), 1.0);
+    // fragColor = vec4(color,1.0); // TODO compare to gamma correction
 }
