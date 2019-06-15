@@ -181,7 +181,7 @@ vec3 phongIllumination(vec3 k_a, vec3 k_d, vec3 k_s, float alpha, vec3 p, vec3 e
  * This assumes that the center of the camera is aligned with the negative z axis in
  * view space when calculating the ray marching direction. See rayDirection.
  */
-mat4 viewMatrix(vec3 eye, vec3 center, vec3 up) {
+mat4 my_ViewMatrix(vec3 eye, vec3 center, vec3 up) {
     // Based on gluLookAt man page
     vec3 f = normalize(center - eye);
     vec3 s = normalize(cross(f, up));
@@ -197,9 +197,10 @@ mat4 viewMatrix(vec3 eye, vec3 center, vec3 up) {
 void mainImage( out vec4 fragColor, in vec2 fragCoord )
 {
 	vec3 viewDir = rayDirection(45.0, iResolution.xy, fragCoord);
-    vec3 eye = vec3(8.0, 5.0, 7.0);
-    
-    mat4 viewToWorld = viewMatrix(eye, vec3(0.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0));
+    vec3 eye = vec3(8.0, 5.0, 17.0);
+    vec3 lookAt = vec3(0.0, 0.0, 0.0);
+    vec3 camUp = vec3(0.0, 1.0, 0.0);
+    mat4 viewToWorld = my_ViewMatrix(eye, lookAt, camUp);
     
     vec3 worldDir = (viewToWorld * vec4(viewDir, 0.0)).xyz;
     

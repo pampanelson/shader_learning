@@ -15,8 +15,10 @@ const float EPSILON = 0.0001;
  * Signed distance function for a sphere centered at the origin with radius 1.0;
  */
 float sphereSDF(vec3 samplePoint) {
-    return length(samplePoint) - 1.0;
-}
+    vec3 p = vec3(1.0,1.0,1.);// ball position 
+    float r = .5;// radius
+ 
+    return length(samplePoint - p) - r;}
 
 /**
  * Signed distance function describing the scene.
@@ -147,7 +149,7 @@ vec3 phongIllumination(vec3 k_a, vec3 k_d, vec3 k_s, float alpha, vec3 p, vec3 e
     vec3 light2Pos = vec3(2.0 * sin(0.37 * iTime),
                           2.0 * cos(0.37 * iTime),
                           2.0);
-    vec3 light2Intensity = vec3(0.4, 0.4, 0.4);
+    vec3 light2Intensity = vec3(0.2, 0.2, 0.2);
     
     color += phongContribForLight(k_d, k_s, alpha, p, eye,
                                   light2Pos,
@@ -159,7 +161,7 @@ vec3 phongIllumination(vec3 k_a, vec3 k_d, vec3 k_s, float alpha, vec3 p, vec3 e
 void mainImage( out vec4 fragColor, in vec2 fragCoord )
 {
 	vec3 dir = rayDirection(45.0, iResolution.xy, fragCoord);
-    vec3 eye = vec3(0.0, 0.0, 5.0);
+    vec3 eye = vec3(0.0, 0.0, 15.0);
     float dist = shortestDistanceToSurface(eye, dir, MIN_DIST, MAX_DIST);
     
     if (dist > MAX_DIST - EPSILON) {
@@ -172,8 +174,8 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     vec3 p = eye + dist * dir;
     
     vec3 K_a = vec3(0.2, 0.2, 0.2);
-    vec3 K_d = vec3(0.7, 0.2, 0.2);
-    vec3 K_s = vec3(1.0, 1.0, 1.0);
+    vec3 K_d = vec3(0.1, 0.2, 0.2);
+    vec3 K_s = vec3(0.0, 1.0, 1.0);
     float shininess = 10.0;
     
     vec3 color = phongIllumination(K_a, K_d, K_s, shininess, p, eye);
