@@ -34,8 +34,8 @@ float map(vec3 p, vec3 cPos) {
     vec3 p1 = p;
     p1.x = mod(p1.x-5., 10.) - 5.;
     p1.y = mod(p1.y-5., 10.) - 5.;
-    p1.z = mod(p1.z, 16.)-8.;
-    p1.xy = pmod(p1.xy, 5.0);
+    p1.z = mod(p1.z, 8.)-8.;
+    p1.xy = pmod(p1.xy, 6.0);
     return ifsBox(p1);
 }
 
@@ -54,7 +54,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
     float acc = 0.0;
     float acc2 = 0.0;
     float t = 0.0;
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 10; i++) {
         vec3 pos = cPos + ray * t;
         float dist = map(pos, cPos);
         dist = max(abs(dist), 0.02);
@@ -68,5 +68,5 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord ) {
     }
 
     vec3 col = vec3(acc * 0.1, acc2 * 0.11 + acc*0.02, acc2 * 0.12+ acc*0.05);
-    fragColor = vec4(col,1.0);
+    fragColor = vec4(col*10.,1.0);
 }

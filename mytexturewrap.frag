@@ -1,8 +1,8 @@
 /**
- * Part 6 Challenges:
- * - Make a scene of your own! Try to use the rotation transforms, the CSG primitives,
- *   and the geometric primitives. Remember you can use vector subtraction for translation,
- *   and component-wise vector multiplication for scaling.
+ * Part 3 Challenges
+ * - Make the camera move up and down while still pointing at the cube
+ * - Make the camera roll (stay looking at the cube, and don't change the eye point)
+ * - Make the camera zoom in and out
  */
 
 const int MAX_MARCHING_STEPS = 255;
@@ -11,71 +11,13 @@ const float MAX_DIST = 100.0;
 const float EPSILON = 0.0001;
 
 /**
- * Rotation matrix around the X axis.
- */
-mat3 rotateX(float theta) {
-    float c = cos(theta);
-    float s = sin(theta);
-    return mat3(
-        vec3(1, 0, 0),
-        vec3(0, c, -s),
-        vec3(0, s, c)
-    );
-}
-
-/**
- * Rotation matrix around the Y axis.
- */
-mat3 rotateY(float theta) {
-    float c = cos(theta);
-    float s = sin(theta);
-    return mat3(
-        vec3(c, 0, s),
-        vec3(0, 1, 0),
-        vec3(-s, 0, c)
-    );
-}
-
-/**
- * Rotation matrix around the Z axis.
- */
-mat3 rotateZ(float theta) {
-    float c = cos(theta);
-    float s = sin(theta);
-    return mat3(
-        vec3(c, -s, 0),
-        vec3(s, c, 0),
-        vec3(0, 0, 1)
-    );
-}
-
-/**
- * Constructive solid geometry intersection operation on SDF-calculated distances.
- */
-float intersectSDF(float distA, float distB) {
-    return max(distA, distB);
-}
-
-/**
- * Constructive solid geometry union operation on SDF-calculated distances.
- */
-float unionSDF(float distA, float distB) {
-    return min(distA, distB);
-}
-
-/**
- * Constructive solid geometry difference operation on SDF-calculated distances.
- */
-float differenceSDF(float distA, float distB) {
-    return max(distA, -distB);
-}
-
-/**
  * Signed distance function for a cube centered at the origin
- * with dimensions specified by size.
+ * with width = height = length = 2.0
  */
-float boxSDF(vec3 p, vec3 size) {
-    vec3 d = abs(p) - (size / 2.0);
+float cubeSDF(vec3 p) {
+    // If d.x < 0, then -1 < p.x < 1, and same logic applies to p.y, p.z
+    // So if all components of d are negative, then p is inside the unit cube
+    vec3 d = abs(p) - vec3(1.0, 1.0, 1.0);
     
     // Assuming p is inside the cube, how far is it from the surface?
     // Result will be negative or zero.
@@ -89,32 +31,10 @@ float boxSDF(vec3 p, vec3 size) {
 }
 
 /**
- * Signed distance function for a sphere centered at the origin with radius r.
+ * Signed distance function for a sphere centered at the origin with radius 1.0;
  */
-float sphereSDF(vec3 p, float r) {
-    return length(p) - r;
-}
-
-/**
- * Signed distance function for an XY aligned cylinder centered at the origin with
- * height h and radius r.
- */
-float cylinderSDF(vec3 p, float h, float r) {
-    // How far inside or outside the cylinder the point is, radially
-    float inOutRadius = length(p.xy) - r;
-    
-    // How far inside or outside the cylinder is, axially aligned with the cylinder
-    float inOutHeight = abs(p.z) - h/2.0;
-    
-    // Assuming p is inside the cylinder, how far is it from the surface?
-    // Result will be negative or zero.
-    float insideDistance = min(max(inOutRadius, inOutHeight), 0.0);
-
-    // Assuming p is outside the cylinder, how far is it from the surface?
-    // Result will be positive or zero.
-    float outsideDistance = length(max(vec2(inOutRadius, inOutHeight), 0.0));
-    
-    return insideDistance + outsideDistance;
+float sphereSDF(vec3 p) {
+    return length(p) - 1.0;
 }
 
 /**
@@ -124,34 +44,8 @@ float cylinderSDF(vec3 p, float h, float r) {
  * Sign indicates whether the point is inside or outside the surface,
  * negative indicating inside.
  */
-float sceneSDF(vec3 samplePoint) {    
-    // Slowly spin the whole scene
-    samplePoint = rotateY(iTime / 2.0) * samplePoint;
-    
-    float cylinderRadius = 0.4 + (1.0 - 0.4) * (1.0 + sin(1.7 * iTime)) / 2.0;
-    float cylinder1 = cylinderSDF(samplePoint, 2.0, cylinderRadius);
-    float cylinder2 = cylinderSDF(rotateX(radians(90.0)) * samplePoint, 2.0, cylinderRadius);
-    float cylinder3 = cylinderSDF(rotateY(radians(90.0)) * samplePoint, 2.0, cylinderRadius);
-    
-    float cube = boxSDF(samplePoint, vec3(1.8, 1.8, 1.8));
-    
-    float sphere = sphereSDF(samplePoint, 1.2);
-    
-    float ballOffset = 0.4 + 1.0 + sin(1.7 * iTime);
-    float ballRadius = 0.3;
-    float balls = sphereSDF(samplePoint - vec3(ballOffset, 0.0, 0.0), ballRadius);
-    balls = unionSDF(balls, sphereSDF(samplePoint + vec3(ballOffset, 0.0, 0.0), ballRadius));
-    balls = unionSDF(balls, sphereSDF(samplePoint - vec3(0.0, ballOffset, 0.0), ballRadius));
-    balls = unionSDF(balls, sphereSDF(samplePoint + vec3(0.0, ballOffset, 0.0), ballRadius));
-    balls = unionSDF(balls, sphereSDF(samplePoint - vec3(0.0, 0.0, ballOffset), ballRadius));
-    balls = unionSDF(balls, sphereSDF(samplePoint + vec3(0.0, 0.0, ballOffset), ballRadius));
-    
-    
-    
-    float csgNut = differenceSDF(intersectSDF(cube, sphere),
-                         unionSDF(cylinder1, unionSDF(cylinder2, cylinder3)));
-    
-    return unionSDF(balls, csgNut);
+float sceneSDF(vec3 samplePoint) {
+    return cubeSDF(samplePoint);
 }
 
 /**
@@ -204,17 +98,6 @@ vec3 estimateNormal(vec3 p) {
     ));
 }
 
-
-//Tetrahedron technique for compute normal
-vec3 estimateNormal1( vec3 p ){
-    const float h = 0.001; // or some other value test with actual scene
-    const vec2 k = vec2(1,-1);
-    return normalize( k.xyy*sceneSDF( p + k.xyy*h ) + 
-                      k.yyx*sceneSDF( p + k.yyx*h ) + 
-                      k.yxy*sceneSDF( p + k.yxy*h ) + 
-                      k.xxx*sceneSDF( p + k.xxx*h ) );
-}
-
 /**
  * Lighting contribution of a single point light source via Phong illumination.
  * 
@@ -233,7 +116,7 @@ vec3 estimateNormal1( vec3 p ){
  */
 vec3 phongContribForLight(vec3 k_d, vec3 k_s, float alpha, vec3 p, vec3 eye,
                           vec3 lightPos, vec3 lightIntensity) {
-    vec3 N = estimateNormal1(p);
+    vec3 N = estimateNormal(p);
     vec3 L = normalize(lightPos - p);
     vec3 V = normalize(eye - p);
     vec3 R = normalize(reflect(-L, N));
@@ -298,22 +181,30 @@ vec3 phongIllumination(vec3 k_a, vec3 k_d, vec3 k_s, float alpha, vec3 p, vec3 e
  * This assumes that the center of the camera is aligned with the negative z axis in
  * view space when calculating the ray marching direction. See rayDirection.
  */
-mat3 my_ViewMatrix(vec3 eye, vec3 center, vec3 up) {
+mat4 viewMatrix(vec3 eye, vec3 center, vec3 up) {
     // Based on gluLookAt man page
     vec3 f = normalize(center - eye);
     vec3 s = normalize(cross(f, up));
     vec3 u = cross(s, f);
-    return mat3(s, u, -f);
+    return mat4(
+        vec4(s, 0.0),
+        vec4(u, 0.0),
+        vec4(-f, 0.0),
+        vec4(0.0, 0.0, 0.0, 1)
+    );
 }
-
+vec3 myColor(vec3 p,vec3 eye){
+	vec3 c = vec3(1.0,0.0,0.0);
+    return c;
+}
 void mainImage( out vec4 fragColor, in vec2 fragCoord )
 {
 	vec3 viewDir = rayDirection(45.0, iResolution.xy, fragCoord);
-    vec3 eye = vec3(8.0, 5.0, -7.0);
+    vec3 eye = vec3(8.0, 5.0, 7.0);
     
-    mat3 viewToWorld = my_ViewMatrix(eye, vec3(0.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0));
+    mat4 viewToWorld = viewMatrix(eye, vec3(0.0, 0.0, 0.0), vec3(0.0, 1.0, 0.0));
     
-    vec3 worldDir = viewToWorld * viewDir;
+    vec3 worldDir = (viewToWorld * vec4(viewDir, 0.0)).xyz;
     
     float dist = shortestDistanceToSurface(eye, worldDir, MIN_DIST, MAX_DIST);
     
@@ -326,13 +217,12 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     // The closest point on the surface to the eyepoint along the view ray
     vec3 p = eye + dist * worldDir;
     
-    // Use the surface normal as the ambient color of the material
-    vec3 K_a = (estimateNormal1(p) + vec3(1.0)) / 2.0; // TODO
-    vec3 K_d = K_a;
+    vec3 K_a = vec3(0.2, 0.2, 0.2);
+    vec3 K_d = vec3(0.7, 0.2, 0.2);
     vec3 K_s = vec3(1.0, 1.0, 1.0);
     float shininess = 10.0;
     
     vec3 color = phongIllumination(K_a, K_d, K_s, shininess, p, eye);
-    
+    color = myColor(p,eye);
     fragColor = vec4(color, 1.0);
 }
