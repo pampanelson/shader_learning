@@ -84,9 +84,9 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     // origin on -y axis 
 	
     vec3 col;
-
-    float scale = 0.5;
-    float w = wave(st.x,iTime,scale);
+    st.x += 0.0; // peak direct up to +y axis, rotate range is -0.25~0.25 
+    float scale = 1.5;
+    float w = wave(st.x,1.0,scale);
     if(st.y < w){
         col += vec3(0.0,0.0,1.0);
     }
