@@ -1,21 +1,13 @@
-/* Created by Vinicius Graciano Santos - vgs/2015 
- * This is a tutorial that explains the polynomial smooth minimum.
- *
- * Read my blog post at http://viniciusgraciano.com/blog/smin/ 
- * for a complete description including all the maths!
- * 
- * This function is a polynomial approximation to the min function,
- * and it is widely used by "shadertoyers" to do smooth unions of 
- * distance functions that represent objects in raymarchers.
- * There are some nice, simple, and beautiful mathematical ideas in it!
- *
- * Polynomial smin was introduced by iq in the following article:
- * http://iquilezles.org/www/articles/smin/smin.htm
- */
 
 precision mediump float;
 const float PI = 3.1415926535;
+const float lineNumF = 10.0;
+const float lineWidith = 0.01;
 
+
+float when_eq(float x, float y) {
+  return 1.0 - abs(sign(x - y));
+}
 
 // Polynomial smooth min (for copying and pasting into your shaders)
 float smin(float a, float b, float k) {
@@ -48,12 +40,10 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
  
     vec2 uv = (fragCoord.xy - .5 * iResolution.xy)/iResolution.y; // uv -.5 ~ .5
     uv *= 2.0; // -1. ~ 1.
-    uv.y += 1.0;
-
+    uv.y += 1.0;// 0 ~ 2
     vec2 st = vec2(atan(uv.x,uv.y),length(uv));
     st.x *= 1.5;
     //st.x = st.x/(PI*2.0) + .5; // before st.x is -π ~ π after is  normalized 0.0 ~ 1.0
-    vec2 st1 = st;
 
     float x = st.x;
     x *= .2;
@@ -77,24 +67,26 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     y = smax(y,y3,0.8);
     y = smax(y,0.2,0.9);
 
+
+    
+    vec2 st1 = st;
+
+    // distort domain to make curve pattern
+    //st1.y += 0.4 * sin(0.007*iTime*(st.x+iTime));
+	st1.y += y;
+    
     vec3 col;
-    if(st.y < y){
-    	col += 1.0;
+    // draw basic line loop ----------------------------
+    float index = floor(st1.y  * lineNumF);
+    float gap = 1.0 / lineNumF;
+    float r = index * gap;
+    if(index > 30.0/st1.y){
+        float line = 1.0 - smoothstep(0.0,lineWidith,abs(st1.y - r));
+
+   		col += line;
     }
-    
-    
+
+
 
 	fragColor = vec4(col,1.0);
 }
-
-
-
-
-
-
-
-
-
-
-
-

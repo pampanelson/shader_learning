@@ -1,20 +1,18 @@
-/* Created by Vinicius Graciano Santos - vgs/2015 
- * This is a tutorial that explains the polynomial smooth minimum.
- *
- * Read my blog post at http://viniciusgraciano.com/blog/smin/ 
- * for a complete description including all the maths!
- * 
- * This function is a polynomial approximation to the min function,
- * and it is widely used by "shadertoyers" to do smooth unions of 
- * distance functions that represent objects in raymarchers.
- * There are some nice, simple, and beautiful mathematical ideas in it!
- *
- * Polynomial smin was introduced by iq in the following article:
- * http://iquilezles.org/www/articles/smin/smin.htm
- */
-
 precision mediump float;
 const float PI = 3.1415926535;
+float lineNumF = 20.0;
+int lineNumI = 80;
+float lineGap = 0.03;
+float lineWidith = 0.005;
+float offsetY = 0.2;
+float lineSaturation = 4.0;
+
+float smtLine(float lineWidith,float f){
+    float res;
+    res = smoothstep(lineWidith,0.0,f);
+    res *= smoothstep(0.0,lineWidith,f)*lineSaturation;
+    return res;
+}
 
 
 // Polynomial smooth min (for copying and pasting into your shaders)
@@ -48,12 +46,10 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
  
     vec2 uv = (fragCoord.xy - .5 * iResolution.xy)/iResolution.y; // uv -.5 ~ .5
     uv *= 2.0; // -1. ~ 1.
-    uv.y += 1.0;
-
+    uv.y += 1.0;// 0 ~ 2
     vec2 st = vec2(atan(uv.x,uv.y),length(uv));
     st.x *= 1.5;
     //st.x = st.x/(PI*2.0) + .5; // before st.x is -π ~ π after is  normalized 0.0 ~ 1.0
-    vec2 st1 = st;
 
     float x = st.x;
     x *= .2;
@@ -77,12 +73,24 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     y = smax(y,y3,0.8);
     y = smax(y,0.2,0.9);
 
+
     vec3 col;
-    if(st.y < y){
-    	col += 1.0;
-    }
-    
-    
+    // if(st.y < y){
+    // 	col += smoothstep(0.0,.01,st.y);
+    // }
+    // if(st.y < y - lineWidith){
+    //     col *= smoothstep(0.001,0.0,st.y);
+    // }
+    vec2 st1 = st;
+    float index = floor(st.y  * lineNumF);
+    // index = 0.0; 
+    float gap = 1.01 / lineNumF;
+    // for(float i = 0.0; i < lineNumF; i++){
+        float r = index * gap;
+        // r += y * 0.02;
+        float line = 1.0 - smoothstep(0.0,lineWidith,abs(st.y - y * 0.02 - r));
+        col += vec3(line);
+    // }
 
 	fragColor = vec4(col,1.0);
 }
