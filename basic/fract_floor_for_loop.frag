@@ -12,8 +12,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     uv.x *= iResolution.x/iResolution.y;
 
     vec3 col;// black write by vec3(float)
-
-    
+    // basic settings ==================================
     vec2 uv1 = uv;
     float n = 10.;
 
