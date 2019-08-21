@@ -1,3 +1,5 @@
+precision mediump float;
+
 const float PI = 3.1415926535;
 vec2 hash( vec2 x )  // replace this by something better
 {
