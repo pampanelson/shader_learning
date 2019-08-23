@@ -74,6 +74,28 @@ float wave(float stx,float t,float scale){
     w *= scale;
     return w;
 }
+
+
+float hash(vec2 p)  // replace this by something better
+{
+    p  = 50.0*fract( p*0.34768375633183 + vec2(0.71,0.113));
+    return -1.0+2.0*fract( p.x*p.y*(p.x+p.y) );
+}
+
+float noise( in vec2 p )
+{
+    vec2 i = floor( p );
+    vec2 f = fract( p );
+	
+	vec2 u = f*f*(3.0-2.0*f);
+
+    return mix( mix( hash( i + vec2(0.0,0.0) ), 
+                     hash( i + vec2(1.0,0.0) ), u.x),
+                mix( hash( i + vec2(0.0,1.0) ), 
+                     hash( i + vec2(1.0,1.0) ), u.x), u.y);
+}
+
+
 void mainImage( out vec4 fragColor, in vec2 fragCoord )
 {
     vec2 uv = (fragCoord - .5 * iResolution.xy)/iResolution.y; // uv -.5 ~ .5
@@ -85,17 +107,28 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
 	
     vec3 col;
     st.x += 0.0; // peak direct up to +y axis, rotate range is -0.25~0.25 
-    float scale = .5;
-    float number = 20.;
+    float number = 1.;
     float oldLine;
-    for(float i = 0.;i<number;i++){
-        float w = wave(st.x+i,1.0,scale*i);
-        if(st.y < w){
-            col += vec3(0.0,0.0,.05);
+
+    vec2 st1 = st;
+    st1.y = fract(st1.y*number);
+
+    float w = 0.1;
+    float scale = 3.;
+    w = wave(st1.x,iTime,scale);
+    w = noise(vec2(st1.y*3.,st1.x*0.5));
+    // w *= 0.5;
+    // col += 1. - smoothstep(0.0,0.15,abs(st1.y - w));
+    col += 1. - smoothstep(0.0,0.004,abs(st1.y - w));
+
+    // for(float i = 0.;i<number;i++){
+    //     float w = wave(st.x+i,1.0,scale*i);
+    //     if(st.y < w){
+    //         col += vec3(0.0,0.0,.05);
             
-        }
-        // col += 1. - smoothstep(0.0, 0.001, abs(st.y - w));
-    }
+    //     }
+    //     col += 1. - smoothstep(0.0, 0.001, abs(st.y - w));
+    // }
 
 
     // Output to screen
