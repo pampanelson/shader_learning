@@ -50,8 +50,10 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
             float index = floor(uv.y * n/l);
             // index = 0. , 1. ,2. ... according to uv.y
             float f = index * stp;
-
-            float line = 1. - smoothstep(0.0,0.002 ,abs(uv.y - f) );
+            float seed = iTime;
+            float rand = rand(seed) * stp;
+            f += rand;
+            float line = 1. - smoothstep(0.0,0.001 ,abs(uv.y - f) );
 
             line *= 10.;
             // col += line;
