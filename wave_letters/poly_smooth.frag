@@ -53,11 +53,16 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     vec2 st = vec2(atan(uv.x,uv.y),length(uv));
     st.x *= 1.5;
     //st.x = st.x/(PI*2.0) + .5; // before st.x is -π ~ π after is  normalized 0.0 ~ 1.0
-    vec2 st1 = st;
 
     float x = st.x;
     x *= .2;
-    x -= fract(iTime*0.1);
+    // x -= fract(iTime*0.1);
+    x += 0.5;
+    x = -x;
+
+    // =+++++++++++++ IMPORTANT ++++++++++++++++++++++++++++
+    x += 0.45; // 0.45 : peak direct up position , 0.0 : - x axis , 0.9 : +x axis 
+
     // float x = uv.x;
     float y = 0.0;
     float a1 = -.2*sin(iTime*5.0);
@@ -65,17 +70,19 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     float y1 = wave2(x,a1,f1);
     float a2 = 0.0;//
     a2 = sin(iTime*10.)*0.1;
-    float f2 = 8.0;
+    float f2 = 8.0; // power ===============================
     float y2 = wave2(x+0.1,a2,f2);
     y = smax(y,y1,0.9);
     y = smax(y,y2,0.8);
     // y = smax(y,wave1(x*0.01),-0.9);
-    float peak3 = 0.2;
-    float narrow3 = 1.0;//*sin(iTime*10.);
+    float peak3 = 0.1;//
+    float narrow3 = 4.0;//*sin(iTime*10.);
     float y3 = wave3(x+0.2,peak3,narrow3);
 
     y = smax(y,y3,0.8);
     y = smax(y,0.2,0.9);
+
+    y *= 1.0;// whole scale =======================
 
     vec3 col;
     if(st.y < y){
