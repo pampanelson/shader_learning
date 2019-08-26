@@ -62,7 +62,7 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
 
     // =+++++++++++++ IMPORTANT ++++++++++++++++++++++++++++
     x += 0.45; // 0.45 : peak direct up position , 0.0 : - x axis , 0.9 : +x axis 
-
+    x += sin(iTime);
     // float x = uv.x;
     float y = 0.0;
     float a1 = -.2*sin(iTime*5.0);
@@ -70,19 +70,22 @@ void mainImage( out vec4 fragColor, in vec2 fragCoord )
     float y1 = wave2(x,a1,f1);
     float a2 = 0.0;//
     a2 = sin(iTime*10.)*0.1;
-    float f2 = 8.0; // power ===============================
+    float f2 = 7.0; // power ===============================
     float y2 = wave2(x+0.1,a2,f2);
     y = smax(y,y1,0.9);
     y = smax(y,y2,0.8);
     // y = smax(y,wave1(x*0.01),-0.9);
     float peak3 = 0.1;//
     float narrow3 = 4.0;//*sin(iTime*10.);
-    float y3 = wave3(x+0.2,peak3,narrow3);
+    float y3 = wave3(x,peak3,narrow3);
 
     y = smax(y,y3,0.8);
     y = smax(y,0.2,0.9);
 
-    y *= 1.0;// whole scale =======================
+
+
+    y *= 0.05;// whole scale =======================
+
 
     vec3 col;
     if(st.y < y){
